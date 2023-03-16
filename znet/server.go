@@ -9,20 +9,17 @@ import (
 type Server struct {
 	Name, IpVersion, Ip string
 	Port                int
+	Router              ziface.IRouter
 }
 
-func CallBackToClient(conn *net.TCPConn, data []byte, cnt int) error {
-	fmt.Println("conn handle callbackToClient...")
-	if _, err := conn.Write(data[:cnt]); err != nil {
-		fmt.Println("write back buf err ", err)
-		return fmt.Errorf("callbackToCLient err")
-	}
-	return nil
+func (s *Server) AddRouter(router ziface.IRouter) {
+	s.Router = router
+	fmt.Println("add router success!")
 }
 
 func (s *Server) Start() {
 	//1、获取一个tcp的addr
-	fmt.Printf("[Start] Server Listenner at Ip: %s, Port: %s, is starting\n", s.Ip, s.Port)
+	fmt.Printf("[Start] Server Listenner at Ip: %s, Port: %d , is starting\n", s.Ip, s.Port)
 	addr, err := net.ResolveTCPAddr(s.IpVersion, fmt.Sprintf("%s:%d", s.Ip, s.Port))
 	if err != nil {
 		fmt.Println("resolve tcp addr error: ", err)
@@ -47,7 +44,7 @@ func (s *Server) Start() {
 		}
 
 		//将处理新连接的业务方法和conn进行绑定得到连接模块
-		dealConn := NewConnection(conn, cid, CallBackToClient)
+		dealConn := NewConnection(conn, cid, s.Router)
 		cid++
 		go dealConn.Start()
 	}
@@ -70,6 +67,7 @@ func NewServer(name string) ziface.IServer {
 		IpVersion: "tcp4",
 		Ip:        "0.0.0.0",
 		Port:      8080,
+		Router:    nil,
 	}
 	return s
 }
