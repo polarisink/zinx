@@ -3,6 +3,7 @@ package znet
 import (
 	"fmt"
 	"net"
+	"zinx/utils"
 	"zinx/ziface"
 )
 
@@ -26,7 +27,7 @@ type Connection struct {
 
 func (c *Connection) Start() {
 	fmt.Println("conn start... connId = ", c.ConnId)
-	//TODO 启动当前连接写数据的业务
+	//TODO 启动当前连接写数据的业务,MaxConn
 	go c.StartReader()
 }
 
@@ -63,7 +64,7 @@ func (c *Connection) StartReader() {
 	defer fmt.Println("connId = ", c.ConnId, " reader is exit, remote addr is ", c.RemoteAddr().String())
 	defer c.Stop()
 	for {
-		buf := make([]byte, 512)
+		buf := make([]byte, utils.GlobalObject.MaxPackageSize)
 		_, err := c.Conn.Read(buf)
 		if err != nil {
 			continue
