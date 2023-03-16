@@ -1,6 +1,7 @@
 package znet
 
 import (
+	"fmt"
 	"net"
 	"zinx/ziface"
 )
@@ -24,13 +25,20 @@ type Connection struct {
 }
 
 func (c *Connection) Start() {
-	//TODO implement me
-	panic("implement me")
+	fmt.Println("conn start... connId = ", c.ConnId)
+	//TODO 启动当前连接写数据的业务
+	go c.StartReader()
 }
 
 func (c *Connection) Stop() {
-	//TODO implement me
-	panic("implement me")
+	fmt.Println("conn stop,,,connId = ", c.ConnId)
+
+	if c.isClosed {
+		return
+	}
+	c.isClosed = true
+	c.Conn.Close()
+	close(c.ExitChan)
 }
 
 func (c *Connection) GetTcpConnection() *net.TCPConn {
@@ -48,6 +56,22 @@ func (c *Connection) RemoteAddr() net.Addr {
 func (c *Connection) Send(data []byte) error {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (c *Connection) StartReader() {
+	fmt.Println("reader goroutine is running...")
+	defer fmt.Println("connId = ", c.ConnId, " reader is exit, remote addr is ", c.RemoteAddr().String())
+	defer c.Stop()
+	for {
+		buf := make([]byte, 512)
+		cnt, err := c.Conn.Read(buf)
+		if err != nil {
+			continue
+		}
+		if err := c.handleApi(c.Conn, buf, cnt); err != nil {
+			fmt.Println("connId ", c.ConnId, " handle is err ", err)
+		}
+	}
 }
 
 // NewConnection 新建连接
