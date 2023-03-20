@@ -1,0 +1,7 @@
+{
+  "name": "zinx v0.4 demo server app",
+  "host": "127.0.0.1",
+  "tcpPort": 8999, 
+  "maxConn": 3, 
+  "maxPacketSize": 512
+}
