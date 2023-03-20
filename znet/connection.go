@@ -7,8 +7,15 @@ import (
 	"zinx/ziface"
 )
 
+<<<<<<< HEAD
 // @author lqs
 // @date 2023/3/15 10:06 PM
+=======
+/**
+ * @author lqs
+ * @date 2023/3/15 10:06 PM
+ */
+>>>>>>> a2d31abb55bd524efb56666a482964231c770239
 
 type Connection struct {
 	//当前连接的tcp套接字
