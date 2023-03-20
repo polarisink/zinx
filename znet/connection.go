@@ -3,7 +3,6 @@ package znet
 import (
 	"fmt"
 	"net"
-	"zinx/utils"
 	"zinx/ziface"
 )
 
@@ -62,12 +61,19 @@ func (c *Connection) StartReader() {
 	defer fmt.Println("connId = ", c.ConnId, " reader is exit, remote addr is ", c.RemoteAddr().String())
 	defer c.Stop()
 	for {
-		buf := make([]byte, utils.GlobalObject.MaxPackageSize)
-		_, err := c.Conn.Read(buf)
-		if err != nil {
-			continue
-		}
+		//buf := make([]byte, utils.GlobalObject.MaxPackageSize)
+		//_, err := c.Conn.Read(buf)
+		//if err != nil {
+		//	continue
+		//}
 
+		//创建拆包解包对象
+		dp := NewDataPack()
+		//读取客户端msg head二进制流8个字节
+
+		//拆包，得到msgId和msgDataLen放在msg消息中
+
+		//根据dataLen，再次读取data，放在msg的data中
 		req := Request{
 			conn: c,
 			data: buf,

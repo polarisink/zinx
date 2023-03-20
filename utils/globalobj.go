@@ -38,11 +38,12 @@ func init() {
 		MaxPackageSize: 4096,
 	}
 	//从json加载
-	GlobalObject.Reload()
+	//GlobalObject.Reload()
 }
 
 func (g *GlobalObj) Reload() {
-	data, err := os.ReadFile("conf/zinx.json")
+
+	data, err := os.ReadFile("./utils/conf/zinx.json")
 	if err != nil {
 		panic(err)
 	}
