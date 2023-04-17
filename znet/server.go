@@ -10,12 +10,21 @@ import (
 type Server struct {
 	Name, IpVersion, Ip string
 	Port                int
-	Router              ziface.IRouter
+	MsgHandler          ziface.IMsgHandle
+	ConnMgr             ziface.IConnManager
+	//创建之后调用
+	OnConnStart func(connection ziface.IConnection)
+	//创建之前调用
+	OnConnStop func(connection ziface.IConnection)
 }
 
-func (s *Server) AddRouter(router ziface.IRouter) {
-	s.Router = router
+func (s *Server) AddRouter(msgId uint32, router ziface.IRouter) {
+	s.MsgHandler.AddRouter(msgId, router)
 	fmt.Println("add router success!")
+}
+
+func (s *Server) GetConnMgr() ziface.IConnManager {
+	return s.ConnMgr
 }
 
 func (s *Server) Start() {
@@ -48,8 +57,15 @@ func (s *Server) Start() {
 				continue
 			}
 
+			//不能超过最大连接
+			if s.ConnMgr.Len() > utils.GlobalObject.MaxConn {
+				fmt.Println()
+				conn.Close()
+				continue
+			}
+
 			//将处理新连接的业务方法和conn进行绑定得到连接模块
-			dealConn := NewConnection(conn, cid, s.Router)
+			dealConn := NewConnection(s, conn, cid, s.MsgHandler)
 			cid++
 			go dealConn.Start()
 		}
@@ -69,11 +85,35 @@ func (s *Server) Serve() {
 
 func NewServer(name string) ziface.IServer {
 	s := &Server{
-		Name:      utils.GlobalObject.Name,
-		IpVersion: "tcp4",
-		Ip:        utils.GlobalObject.Host,
-		Port:      utils.GlobalObject.TcpPort,
-		Router:    nil,
+		Name:       utils.GlobalObject.Name,
+		IpVersion:  "tcp4",
+		Ip:         utils.GlobalObject.Host,
+		Port:       utils.GlobalObject.TcpPort,
+		MsgHandler: NewMsgHandle(),
+		ConnMgr:    NewConnManager(),
 	}
 	return s
+}
+
+func (s *Server) SetOnConnStart(f func(connection ziface.IConnection)) {
+	s.OnConnStart = f
+}
+
+func (s *Server) SetOnConnStop(f func(connection ziface.IConnection)) {
+	s.OnConnStop = f
+}
+
+func (s *Server) CallOnConnStart(connection ziface.IConnection) {
+	if s.OnConnStart != nil {
+		s.OnConnStart(connection)
+		fmt.Println("call onConn start()")
+	}
+}
+
+func (s *Server) CallOnConnStop(connection ziface.IConnection) {
+	if s.OnConnStop != nil {
+		s.OnConnStop(connection)
+		fmt.Println("call onConn stop()")
+
+	}
 }

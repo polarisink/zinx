@@ -27,7 +27,7 @@ func (d *DataPack) Pack(message ziface.IMessage) ([]byte, error) {
 	//创建一个缓冲
 	buf := bytes.NewBuffer([]byte{})
 	//将dataLen写进buf
-	if err := writeData(buf, message.GetDataLen()); err != nil {
+	if err := writeData(buf, message.GetMsgLen()); err != nil {
 		return nil, err
 	}
 	//将msgId写进buf

@@ -9,5 +9,15 @@ type IServer interface {
 	// Serve 运行服务器
 	Serve()
 	// AddRouter 路由功能
-	AddRouter(router IRouter)
+	AddRouter(uint32, IRouter)
+
+	GetConnMgr() IConnManager
+
+	SetOnConnStart(func(connection IConnection))
+
+	SetOnConnStop(func(connection IConnection))
+
+	CallOnConnStart(connection IConnection)
+
+	CallOnConnStop(connection IConnection)
 }
